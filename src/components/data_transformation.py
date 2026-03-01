@@ -1,13 +1,15 @@
 import os
 import sys
-import pandas as pd
+import pickle
 import numpy as np
+import pandas as pd
+
 from dataclasses import dataclass
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+
 from src.exception import CustomException
 from src.logger import logging
-import pickle
 
 
 @dataclass
@@ -27,26 +29,33 @@ class DataTransformation:
                 ]
             )
             return pipeline
+
         except Exception as e:
             raise CustomException(e, sys)
 
     def initiate_data_transformation(self, train_path, test_path):
-        logging.info("Data transformation started")
         try:
+            logging.info("Data transformation started")
+
+            # Load data
             train_df = pd.read_csv(train_path)
             test_df = pd.read_csv(test_path)
 
+            # Convert date column
             train_df["Order Date"] = pd.to_datetime(train_df["Order Date"])
             test_df["Order Date"] = pd.to_datetime(test_df["Order Date"])
 
+            # 🔹 DEFINE TARGET COLUMN FIRST (IMPORTANT)
             target_column = "Sales"
 
-            X_train = train_df.drop(columns=[target_column, "Order Date"], axis=1)
+            # 🔹 NOW drop columns
+            X_train = train_df.drop(columns=[target_column, "Order Date"])
             y_train = train_df[target_column]
 
-            X_test = test_df.drop(columns=[target_column, "Order Date"], axis=1)
+            X_test = test_df.drop(columns=[target_column, "Order Date"])
             y_test = test_df[target_column]
 
+            # Preprocessing
             preprocessor = self.get_data_transformer_object()
 
             X_train_scaled = preprocessor.fit_transform(X_train)
@@ -62,11 +71,7 @@ class DataTransformation:
 
             logging.info("Data transformation completed")
 
-            return (
-                train_arr,
-                test_arr,
-                self.config.preprocessor_obj_file_path
-            )
+            return train_arr, test_arr, self.config.preprocessor_obj_file_path
 
         except Exception as e:
             raise CustomException(e, sys)
