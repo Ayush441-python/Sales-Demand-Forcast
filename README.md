@@ -1,0 +1,1 @@
+### The Sales Demand Forecasting project predicts future product sales based on historical sales data. This helps businesses optimize inventory, reduce stock shortages, and improve supply chain planning.
